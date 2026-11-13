@@ -1,0 +1,3 @@
+set output "Tournee.ps"
+set terminal postscript
+plot "Tournee_xy.30.out" with lines

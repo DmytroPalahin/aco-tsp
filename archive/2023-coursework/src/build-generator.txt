@@ -1,0 +1,2 @@
+gcc -ansi -Wall -Wextra Ant_Roulette_Probability_File_Generator.c -o Ant_Roulette_Probability_File_Generator.exe -lm
+./Ant_Roulette_Probability_File_Generator.exe
