@@ -1,0 +1,8 @@
+reset
+set xlabel "X" 
+set ylabel "Y"
+set grid
+set yrange [-5:60]
+set xrange[-5:60]
+set title "ANT Route" font "Helvetica Bold, 30"
+plot 'C:\Users\Admin\Desktop\Sup_Galilee\2_anne\S_2\4_INFORMATIQUE\!_Project_C_Ant\GENERATOR_ROUTE_GNUPLOT.txt' using 1:2 with lines

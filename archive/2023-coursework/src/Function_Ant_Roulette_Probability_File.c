@@ -39,19 +39,19 @@ int main() {
 #define ro 0.36
 #define Q 4
 #define tau_0 0.200
-#define MAX_EPOCH 200
+#define MAX_EPOCH 40
 /*  *********************************************************************** */
 
 
 
 	/* Write to Data the file which we will use */
-	char Data[50] = "TSP.40";
+	char Data[50] = "TSP.30";
 
 
 	unsigned int res_temp = read_number(Data);
 	const unsigned int N = res_temp;
 
-    unsigned long int dimension = ((N - 1) * N) / 2;
+    const unsigned long int dimension = ((N - 1) * N) / 2;
     unsigned int Temp_Array[dimension];
 
 
