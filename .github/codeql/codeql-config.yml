@@ -1,0 +1,17 @@
+name: aco-tsp
+
+# The security-and-quality suite applies in full, except for two queries that
+# report the intended behaviour of a command-line tool rather than a defect.
+query-filters:
+  # "A file name comes from the command line." Opening the file its user names
+  # is the purpose of `aco-tsp solve <instance>`. The program runs with that
+  # user's own privileges and crosses no trust boundary.
+  - exclude:
+      id: cpp/path-injection
+
+  # "fopen() may create a file with mode 0666." fopen() is the only way ISO C
+  # has of creating a file, and the result is subject to the user's umask,
+  # exactly like a shell redirection. The files written (tours, traces,
+  # instances) hold nothing sensitive.
+  - exclude:
+      id: cpp/world-writable-file-creation
