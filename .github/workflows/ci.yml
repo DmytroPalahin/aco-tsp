@@ -1,0 +1,250 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same pull request supersedes the run in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+# The same shell everywhere, Windows included, with `pipefail` on.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Build, test and install on every supported platform and compiler.
+  # -------------------------------------------------------------------------
+  build:
+    name: ${{ matrix.config.name }} / ${{ matrix.build_type }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { name: Linux GCC, os: ubuntu-24.04, cc: gcc, werror: "ON" }
+          - { name: Linux Clang, os: ubuntu-24.04, cc: clang, werror: "ON" }
+          - { name: macOS Clang, os: macos-15, cc: clang, werror: "ON" }
+          # MSVC is built with /W4 but its warnings are not fatal: they
+          # cannot be reproduced on the maintainer's machines.
+          - { name: Windows MSVC, os: windows-2025, cc: "", werror: "OFF" }
+        build_type: [Debug, Release]
+    env:
+      CC: ${{ matrix.config.cc }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DACO_WARNINGS_AS_ERRORS=${{ matrix.config.werror }}
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Test
+        run: >
+          ctest --test-dir build --build-config ${{ matrix.build_type }}
+          --output-on-failure --no-tests=error
+
+      - name: Install
+        run: cmake --install build --config ${{ matrix.build_type }} --prefix install
+
+      # Proves that the installed headers, library and CMake package are
+      # enough for an outside project to use the library. CMake wants an
+      # absolute prefix; on Windows the workspace path has backslashes, which
+      # the substitution turns into the forward slashes CMake prefers.
+      - name: Build the examples against the installed package
+        env:
+          INSTALL_PREFIX: ${{ github.workspace }}/install
+        run: |
+          cmake -S examples -B build-examples -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            "-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX//\\//}"
+          cmake --build build-examples --config ${{ matrix.build_type }}
+
+  # -------------------------------------------------------------------------
+  # Memory and undefined-behaviour errors.
+  # -------------------------------------------------------------------------
+  sanitizers:
+    name: ASan + UBSan
+    runs-on: ubuntu-24.04
+    env:
+      CC: clang
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Configure, build and test
+        run: cmake --workflow --preset sanitize
+
+  valgrind:
+    name: Valgrind
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Valgrind
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends valgrind
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --parallel
+      # Memcheck also reports reads of uninitialised memory, which the
+      # sanitizer job above cannot see.
+      - name: Run the unit tests under Memcheck
+        run: |
+          for test in build/tests/test_*; do
+            echo "::group::$(basename "$test")"
+            valgrind --quiet --error-exitcode=1 --leak-check=full --show-leak-kinds=all \
+              --errors-for-leak-kinds=all "$test"
+            echo "::endgroup::"
+          done
+      - name: Run the command-line tool under Memcheck
+        run: |
+          valgrind --quiet --error-exitcode=1 --leak-check=full --errors-for-leak-kinds=all \
+            build/aco-tsp solve data/random/random050.tsp --seed 1 --iterations 20 \
+            --local-search 2opt --tour best.tour --trace trace.csv --plot tour.dat
+
+  fuzz:
+    name: Fuzz the parser
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build
+        run: cmake --preset fuzz && cmake --build --preset fuzz --parallel
+      # A short smoke run: long enough to catch regressions in the parser,
+      # short enough to run on every push.
+      - name: Fuzz for one minute
+        run: |
+          mkdir corpus && cp fuzz/corpus/* corpus/
+          build/fuzz/fuzz/fuzz_instance_parse -max_len=2048 -max_total_time=60 \
+            -print_final_stats=1 corpus
+      - name: Keep the crashing input
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fuzz-crash
+          path: |
+            crash-*
+            leak-*
+            timeout-*
+            oom-*
+          if-no-files-found: ignore
+
+  # -------------------------------------------------------------------------
+  # Style and static analysis.
+  # -------------------------------------------------------------------------
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # clang-format output changes between releases: pin the exact version
+      # the sources were formatted with.
+      - name: Check the formatting
+        run: |
+          find include src tests examples fuzz \( -name '*.c' -o -name '*.h' \) -print0 |
+            xargs -0 pipx run --spec clang-format==23.1.5 clang-format --dry-run --Werror
+
+  static-analysis:
+    name: clang-tidy
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # New clang-tidy releases add checks, and .clang-tidy turns every
+      # finding into an error: stay on the major version it was tuned for.
+      - name: Install LLVM 23
+        run: brew install llvm@23
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Run clang-tidy
+        run: |
+          find src tests examples -name '*.c' -print0 |
+            xargs -0 -n 4 -P 4 "$(brew --prefix llvm@23)/bin/clang-tidy" -p build --quiet
+
+  # -------------------------------------------------------------------------
+  # Test coverage, with a floor so that it cannot silently erode.
+  # -------------------------------------------------------------------------
+  coverage:
+    name: Coverage
+    runs-on: macos-15
+    env:
+      MINIMUM_LINE_COVERAGE: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build with instrumentation
+        run: cmake --preset coverage && cmake --build --preset coverage --parallel
+      - name: Run the tests
+        run: ctest --preset coverage
+        env:
+          LLVM_PROFILE_FILE: ${{ github.workspace }}/build/coverage/profiles/%p-%m.profraw
+      - name: Summarise
+        working-directory: build/coverage
+        run: |
+          xcrun llvm-profdata merge -sparse profiles/*.profraw -o coverage.profdata
+          objects=(aco-tsp)
+          for test in tests/test_*; do
+            if [[ -f $test && -x $test ]]; then
+              objects+=(-object "$test")
+            fi
+          done
+          options=(-instr-profile=coverage.profdata '-ignore-filename-regex=(tests|examples)/')
+
+          {
+            echo '### Test coverage'
+            echo '```'
+            xcrun llvm-cov report "${objects[@]}" "${options[@]}" | sed "s|$GITHUB_WORKSPACE/||"
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"
+          xcrun llvm-cov show "${objects[@]}" "${options[@]}" -format=html -output-dir=html
+
+          lines=$(xcrun llvm-cov export "${objects[@]}" "${options[@]}" -summary-only |
+            jq '.data[0].totals.lines.percent')
+          echo "line coverage: $lines %"
+          jq --null-input --exit-status --argjson lines "$lines" \
+            --argjson minimum "$MINIMUM_LINE_COVERAGE" '$lines >= $minimum' >/dev/null ||
+            { echo "::error::line coverage $lines % is below $MINIMUM_LINE_COVERAGE %"; exit 1; }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-report
+          path: build/coverage/html
+
+  # -------------------------------------------------------------------------
+  # Documentation: API reference and the written report.
+  # -------------------------------------------------------------------------
+  docs:
+    name: API reference
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Doxygen
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends doxygen
+      - name: Generate
+        run: |
+          cmake -S . -B build -DACO_BUILD_TESTS=OFF -DACO_BUILD_EXAMPLES=OFF
+          cmake --build build --target docs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: api-reference
+          path: build/docs/html
+
+  report:
+    name: Report (PDF)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: xu-cheng/latex-action@6549dc21effb2730855a1281407ecfcececc6c1b # 4.1.0
+        with:
+          working_directory: report
+          root_file: report.tex
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: report
+          path: report/report.pdf
+          if-no-files-found: error

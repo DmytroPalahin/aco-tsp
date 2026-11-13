@@ -1,0 +1,14 @@
+# Text files are stored with LF and checked out with LF on every platform:
+# the instance parser accepts CR LF, but diffs and checksums should not vary.
+* text=auto eol=lf
+
+*.pdf  binary
+*.png  binary
+*.docx binary
+*.ps   binary
+
+# Generated or historical material should not skew the language statistics
+# nor clutter pull-request diffs.
+archive/**      linguist-vendored
+report/data/**  linguist-generated
+docs/assets/**  linguist-generated

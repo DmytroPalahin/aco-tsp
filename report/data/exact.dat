@@ -1,0 +1,6 @@
+# cities instances as_optimal_percent as_mean_gap as_worst_gap hybrid_optimal_percent hybrid_mean_gap hybrid_worst_gap
+8 100 100 0.000 0.00 100 0.000 0.00
+10 100 94 0.129 5.71 100 0.000 0.00
+12 100 95 0.070 3.19 100 0.000 0.00
+14 100 89 0.089 1.71 100 0.000 0.00
+16 100 89 0.145 5.19 100 0.000 0.00

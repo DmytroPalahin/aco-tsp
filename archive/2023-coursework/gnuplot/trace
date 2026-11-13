@@ -1,0 +1,3 @@
+#!/bin/sh
+gnuplot Tournee30
+ggv Tournee30.ps

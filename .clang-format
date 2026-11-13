@@ -1,0 +1,34 @@
+# Formatting rules for every C file of the project.
+# Apply with `cmake --build <dir> --target format`; CI runs `format-check`.
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+ColumnLimit: 100
+IndentWidth: 4
+ContinuationIndentWidth: 4
+UseTab: Never
+
+# Functions open on their own line, everything else on the same line (K&R).
+BreakBeforeBraces: Linux
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+InsertBraces: true
+
+PointerAlignment: Right
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Right
+AlignTrailingComments: true
+IndentCaseLabels: false
+SpaceAfterCStyleCast: false
+
+# Public headers first, then the project's private ones, then the C library.
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
+
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+InsertNewlineAtEOF: true
+...

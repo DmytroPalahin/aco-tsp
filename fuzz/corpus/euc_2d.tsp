@@ -1,0 +1,11 @@
+NAME : rectangle
+COMMENT : a 3 by 4 rectangle
+TYPE : TSP
+DIMENSION : 4
+EDGE_WEIGHT_TYPE : EUC_2D
+NODE_COORD_SECTION
+1 0 0
+2 3 0
+3 3 4
+4 0 4
+EOF

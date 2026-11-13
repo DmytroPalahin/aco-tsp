@@ -1,0 +1,25 @@
+name: aco-tsp
+
+# The security-and-quality suite applies in full, except for the queries
+# below: each reports something this project does on purpose, not a defect.
+query-filters:
+  # "A file name comes from the command line." Opening the file its user names
+  # is the purpose of `aco-tsp solve <instance>`. The program runs with that
+  # user's own privileges and crosses no trust boundary.
+  - exclude:
+      id: cpp/path-injection
+
+  # "fopen() may create a file with mode 0666." fopen() is the only way ISO C
+  # has of creating a file, and the result is subject to the user's umask,
+  # exactly like a shell redirection. The files written (tours, traces,
+  # instances) hold nothing sensitive.
+  - exclude:
+      id: cpp/world-writable-file-creation
+
+  # "Equality test on floating-point values." Every such comparison here is
+  # deliberate: a tie between two stored distances, the integrality test that
+  # decides how a number is printed, and tests that assert exact results
+  # (symmetry, a matrix read back unchanged, coordinates that are integers).
+  # A tolerance would be wrong in each of those places.
+  - exclude:
+      id: cpp/equality-on-floats

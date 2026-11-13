@@ -1,0 +1,43 @@
+# Build trees (the CMake presets build into build/<preset>)
+/build/
+/build-*/
+/install/
+/dist/
+CMakeUserPresets.json
+compile_commands.json
+
+# LaTeX intermediates (report/report.pdf itself is committed, for readers)
+/report/*.aux
+/report/*.bbl
+/report/*.blg
+/report/*.fdb_latexmk
+/report/*.fls
+/report/*.log
+/report/*.out
+/report/*.synctex.gz
+/report/*.toc
+
+# Output of the tool when run from the repository root
+*.tour
+/trace.csv
+/tour.dat
+
+# Coverage and fuzzing by-products
+*.profraw
+*.profdata
+crash-*
+leak-*
+oom-*
+timeout-*
+
+# Kept on the maintainer's machine, not published (see archive/README.md)
+/archive/2023-coursework/report/assignment-2023-fr.pdf
+/archive/2023-coursework/report/report-2023-fr-original.pdf
+/archive/2023-coursework/report/*.docx
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
