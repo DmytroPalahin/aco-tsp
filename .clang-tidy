@@ -1,0 +1,66 @@
+# Static analysis configuration.
+#
+# Whole check families are enabled; the few exclusions below are deliberate
+# and each one says why.
+---
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  misc-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -bugprone-easily-swappable-parameters,
+  -cert-err33-c,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  -misc-include-cleaner,
+  -misc-no-recursion,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversion,
+  -readability-magic-numbers,
+  -readability-math-missing-parentheses,
+  -readability-trailing-comma
+
+# bugprone-easily-swappable-parameters
+#   (row, column) and (from, to) index pairs are inherent to matrix code.
+# cert-err33-c
+#   Demands a check on every fprintf(); stream errors are tested once with
+#   ferror() after writing instead.
+# clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
+#   Recommends the Annex K *_s functions, which most C libraries do not ship.
+# misc-include-cleaner
+#   Disagrees with the umbrella header <aco/aco.h> used by tests and examples.
+# misc-no-recursion
+#   The tests enumerate permutations recursively on at most nine cities.
+# readability-function-cognitive-complexity
+#   The numeric kernels are nested loops by nature; they are kept short instead.
+# readability-identifier-length
+#   i, j, k, a, b, c, d are the conventional names in this domain.
+# readability-implicit-bool-conversion
+#   In C, comparisons and logical operators have type int, so the check fires
+#   on every `return a < b;` of a function returning bool.
+# readability-magic-numbers
+#   Flags every numeric literal in the tests' expected values.
+# readability-math-missing-parentheses
+#   `i * size + j` is clearer without redundant parentheses.
+# readability-trailing-comma
+#   Layout of initialiser lists is clang-format's job.
+
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(include/aco|src|tests|examples|fuzz)/'
+FormatStyle: file
+
+CheckOptions:
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '0'
+  - key: bugprone-narrowing-conversions.WarnOnIntegerToFloatingPointNarrowingConversion
+    value: 'false'
+  # `x >> 30` shifts an unsigned value by a literal: nothing signed is at risk.
+  - key: bugprone-signed-bitwise.IgnorePositiveIntegerLiterals
+    value: 'true'
+  - key: hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
+    value: 'true'
+...
