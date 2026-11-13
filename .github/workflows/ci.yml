@@ -60,10 +60,15 @@ jobs:
         run: cmake --install build --config ${{ matrix.build_type }} --prefix install
 
       # Proves that the installed headers, library and CMake package are
-      # enough for an outside project to use the library.
+      # enough for an outside project to use the library. CMake wants an
+      # absolute prefix; on Windows the workspace path has backslashes, which
+      # the substitution turns into the forward slashes CMake prefers.
       - name: Build the examples against the installed package
+        env:
+          INSTALL_PREFIX: ${{ github.workspace }}/install
         run: |
-          cmake -S examples -B build-examples -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_PREFIX_PATH:PATH=install
+          cmake -S examples -B build-examples -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            "-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX//\\//}"
           cmake --build build-examples --config ${{ matrix.build_type }}
 
   # -------------------------------------------------------------------------
