@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using the metadata below.
+title: "aco-tsp: ant colony optimisation for the travelling salesman problem"
+type: software
+authors:
+  - family-names: Palahin
+    given-names: Dmytro
+version: 2.0.0
+date-released: "2026-11-13"
+license: MIT
+repository-code: https://github.com/DmytroPalahin/aco-tsp
+abstract: >-
+  A C11 library and command-line tool that solve the symmetric travelling
+  salesman problem with Ant System, optionally combined with elitist
+  reinforcement, greedy exploitation and 2-opt local search. Includes
+  reference solvers, a TSPLIB reader and a reproducible experimental study.
+keywords:
+  - ant colony optimization
+  - travelling salesman problem
+  - metaheuristics
+  - combinatorial optimization
+  - C
