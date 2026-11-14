@@ -142,52 +142,53 @@
 % Title page
 % =============================================================================
 \begin{titlepage}
-  \centering
-  \vspace*{2.2cm}
+    \centering
+    \vspace*{2.2cm}
 
-  {\small\scshape\color{slate} Project report\par}
-  \vspace{1.1cm}
+    {\small\scshape\color{slate} Project report\par}
+    \vspace{1.1cm}
 
-  {\Huge\bfseries\color{ink} Solving the Travelling Salesman\\[0.25em] Problem with Ant Colony\\[0.25em] Optimisation\par}
-  \vspace{0.9cm}
-  {\Large\color{slate} Design, implementation and evaluation of \tool\par}
-  \vspace{1.6cm}
+    {\Huge\bfseries\color{ink} Solving the Travelling Salesman\\[0.25em] Problem with Ant Colony\\[0.25em] Optimisation\par}
+    \vspace{0.9cm}
+    {\Large\color{slate} Design, implementation and evaluation of \tool\par}
+    \vspace{1.6cm}
 
-  \begin{tikzpicture}
-    \begin{axis}[tour, width=7.4cm]
-      \addplot[rust, line width=0.9pt] table[x index=0, y index=1] {data/tour_hybrid.dat};
-      \addplot[only marks, mark=*, mark size=1.1pt, ink] table[x index=0, y index=1] {data/tour_hybrid.dat};
-    \end{axis}
-  \end{tikzpicture}
-  \vspace{1.4cm}
+    \begin{tikzpicture}
+        \begin{axis}[tour, width=7.4cm]
+            \addplot[rust, line width=0.9pt] table[x index=0, y index=1] {data/tour_hybrid.dat};
+            \addplot[only marks, mark=*, mark size=1.1pt, ink] table[x index=0, y index=1] {data/tour_hybrid.dat};
+        \end{axis}
+    \end{tikzpicture}
+    \vspace{1.4cm}
 
-  {\Large Dmytro Palahin\par}
-  \vspace{0.5cm}
-  {\normalsize Version 2.0 \quad$\cdot$\quad November 2026\par}
+    {\Large Dmytro Palahin\par}
+    \vspace{0.5cm}
+    {\normalsize Version 1.0 \quad$\cdot$\quad May 2023\par}
+    {\normalsize Version 2.0 \quad$\cdot$\quad November 2026\par}
 
-  \vfill
-  \begin{minipage}{0.86\linewidth}
-    \small\color{slate}\centering
-    Revised and extended edition of a report written in February 2023, with a classmate,
-    for the course \emph{Projet Informatique} (CP2I2, Sup Galilée, Université Sorbonne
-    Paris Nord), taught by Frédéric Roupin.
-  \end{minipage}
+    \vfill
+    \begin{minipage}{0.86\linewidth}
+        \small\color{slate}\centering
+        Revised and extended edition of a report written in February 2023, with a classmate,
+        for the course \emph{Projet Informatique} (CP2I2, Sup Galilée, Université Sorbonne
+        Paris Nord), taught by Frédéric Roupin.
+    \end{minipage}
 \end{titlepage}
 
 % =============================================================================
 \begin{abstract}
-\noindent
-This report describes \tool, a C11 library and command-line tool that searches for short
-tours of the symmetric travelling salesman problem with ant colony optimisation. It states
-the problem and the representation of its solutions, derives the Ant System algorithm and
-three classic refinements, explains how they are implemented and verified, and evaluates
-them experimentally. On \num{500} random instances small enough for the
-optimum to be proven, Ant System finds it in \SIrange{89}{100}{\percent}
-of the runs, and in every run once it is combined with a 2-opt local search. On the
-instances of up to 100 cities supplied with the original assignment, that hybrid produces
-tours \SIrange{2.9}{11.9}{\percent} shorter than a strong deterministic baseline, in about
-half a second. The project started as second-year coursework; the report also documents
-what was wrong with that first version and how the rewrite addresses it.
+    \noindent
+    This report describes \tool, a C11 library and command-line tool that searches for short
+    tours of the symmetric travelling salesman problem with ant colony optimisation. It states
+    the problem and the representation of its solutions, derives the Ant System algorithm and
+    three classic refinements, explains how they are implemented and verified, and evaluates
+    them experimentally. On \num{500} random instances small enough for the
+    optimum to be proven, Ant System finds it in \SIrange{89}{100}{\percent}
+    of the runs, and in every run once it is combined with a 2-opt local search. On the
+    instances of up to 100 cities supplied with the original assignment, that hybrid produces
+    tours \SIrange{2.9}{11.9}{\percent} shorter than a strong deterministic baseline, in about
+    half a second. The project started as second-year coursework; the report also documents
+    what was wrong with that first version and how the rewrite addresses it.
 \end{abstract}
 
 {\linespread{0.98}\selectfont\tableofcontents}
@@ -208,16 +209,16 @@ optimality.
 
 \paragraph{Origin of the project.}
 The work began in 2023 as the term project of the course \emph{Projet
-Informatique}~\cite{roupin2023projet}. Each pair of students chose one of three problems
+    Informatique}~\cite{roupin2023projet}. Each pair of students chose one of three problems
 (DNA sequencing, delivery tours, scheduling with deadlines) and one of three generic
 heuristics (simulated annealing, a genetic algorithm, an ant colony), and was asked to:
 \begin{enumerate}[label=(\roman*)]
-  \item state the function to optimise;
-  \item choose a representation for the feasible solutions;
-  \item specify the problem-dependent parts of the method, here how an ant moves and how
-        the probability of a move is computed;
-  \item implement the method in C and tune its parameters experimentally;
-  \item evaluate and compare the results.
+    \item state the function to optimise;
+    \item choose a representation for the feasible solutions;
+    \item specify the problem-dependent parts of the method, here how an ant moves and how
+          the probability of a move is computed;
+    \item implement the method in C and tune its parameters experimentally;
+    \item evaluate and compare the results.
 \end{enumerate}
 We chose delivery tours and the ant colony. The program we handed in worked, in the sense
 that it printed plausible tours, but it was a prototype: a single 300-line function,
@@ -254,8 +255,8 @@ distance, are an important special case and the only one that can be drawn.
 A tour is described by the order $\pi=(\pi_1,\dots,\pi_n)$ in which it visits the cities,
 a permutation of $\{1,\dots,n\}$. Its length, the function to minimise, is
 \begin{equation}
-  L(\pi) \;=\; \sum_{i=1}^{n-1} d_{\pi_i\pi_{i+1}} \;+\; d_{\pi_n\pi_1},
-  \label{eq:length}
+    L(\pi) \;=\; \sum_{i=1}^{n-1} d_{\pi_i\pi_{i+1}} \;+\; d_{\pi_n\pi_1},
+    \label{eq:length}
 \end{equation}
 the last term being the trip back to the starting point. Rotating $\pi$ or reversing it
 describes the same cycle, so there are $(n-1)!/2$ distinct tours: \num{181440}
@@ -323,11 +324,11 @@ The colony has $m$ ants. At each iteration every ant builds a complete tour. Sup
 $k$ stands in city $i$ and let $N_i^k$ be the set of cities it has not visited. It moves to
 $j\in N_i^k$ with probability
 \begin{equation}
-  p_{ij}^{k} \;=\;
-  \frac{\tau_{ij}^{\alpha}\,\eta_{ij}^{\beta}}
-       {\displaystyle\sum_{l\in N_i^k}\tau_{il}^{\alpha}\,\eta_{il}^{\beta}},
-  \qquad\text{where}\qquad \eta_{ij}=\frac{1}{d_{ij}}.
-  \label{eq:transition}
+    p_{ij}^{k} \;=\;
+    \frac{\tau_{ij}^{\alpha}\,\eta_{ij}^{\beta}}
+    {\displaystyle\sum_{l\in N_i^k}\tau_{il}^{\alpha}\,\eta_{il}^{\beta}},
+    \qquad\text{where}\qquad \eta_{ij}=\frac{1}{d_{ij}}.
+    \label{eq:transition}
 \end{equation}
 Two quantities make an edge attractive. Its \emph{visibility} $\eta_{ij}$ is fixed by the
 instance and says that near cities are good candidates: it is the greedy part of the
@@ -346,14 +347,14 @@ When all ants have completed their tours $T_1,\dots,T_m$, of lengths $L_1,\dots,
 trail first loses a fraction $\rho$ of its pheromone and is then reinforced by the ants
 that used it:
 \begin{equation}
-  \tau_{ij} \;\leftarrow\; (1-\rho)\,\tau_{ij} \;+\; \sum_{k=1}^{m}\Delta\tau_{ij}^{k},
-  \qquad
-  \Delta\tau_{ij}^{k} =
-  \begin{cases}
-    Q/L_k & \text{if the edge } \{i,j\} \text{ belongs to } T_k,\\
-    0     & \text{otherwise.}
-  \end{cases}
-  \label{eq:update}
+    \tau_{ij} \;\leftarrow\; (1-\rho)\,\tau_{ij} \;+\; \sum_{k=1}^{m}\Delta\tau_{ij}^{k},
+    \qquad
+    \Delta\tau_{ij}^{k} =
+    \begin{cases}
+        Q/L_k & \text{if the edge } \{i,j\} \text{ belongs to } T_k, \\
+        0     & \text{otherwise.}
+    \end{cases}
+    \label{eq:update}
 \end{equation}
 An ant has a fixed budget $Q$ of pheromone and spreads it over its tour, so the edges of a
 short tour receive more. Evaporation, governed by $\rho\in[0,1]$, is what lets the colony
@@ -366,8 +367,8 @@ deposits, the first iteration decides everything; if it is much larger, many ite
 pass before the deposits matter. We follow the recommendation of Dorigo and
 Stützle~\cite{dorigo2004aco} and set
 \begin{equation}
-  \tau_0 \;=\; \frac{m\,Q}{L_{\mathrm{nn}}},
-  \label{eq:tau0}
+    \tau_0 \;=\; \frac{m\,Q}{L_{\mathrm{nn}}},
+    \label{eq:tau0}
 \end{equation}
 where $L_{\mathrm{nn}}$ is the length of a nearest-neighbour tour: this is the amount one
 iteration would deposit on an edge if all ants followed that tour, that is, the order of
@@ -379,29 +380,29 @@ ones.
 $m=n$, as in the original paper, and from a random city otherwise.
 
 \begin{algorithm}[htbp]
-  \caption{Ant System for the travelling salesman problem}
-  \label{alg:ant-system}
-  \begin{algorithmic}[1]
-    \Require distances $(d_{ij})$; parameters $m$, $\alpha$, $\beta$, $\rho$, $Q$; number of iterations $t_{\max}$
-    \Ensure the best tour found, $T^{\ast}$
-    \State $\tau_{ij}\gets\tau_0$ for every edge; \quad $L^{\ast}\gets\infty$
-    \For{$t=1,\dots,t_{\max}$}
-      \For{each ant $k=1,\dots,m$}
+    \caption{Ant System for the travelling salesman problem}
+    \label{alg:ant-system}
+    \begin{algorithmic}[1]
+        \Require distances $(d_{ij})$; parameters $m$, $\alpha$, $\beta$, $\rho$, $Q$; number of iterations $t_{\max}$
+        \Ensure the best tour found, $T^{\ast}$
+        \State $\tau_{ij}\gets\tau_0$ for every edge; \quad $L^{\ast}\gets\infty$
+        \For{$t=1,\dots,t_{\max}$}
+        \For{each ant $k=1,\dots,m$}
         \State place the ant in its starting city; mark every other city unvisited
         \While{some city is unvisited}
-          \State choose the next city $j$ with the probabilities $p_{ij}^{k}$ of \cref{eq:transition}
-          \State move to $j$ and mark it visited
+        \State choose the next city $j$ with the probabilities $p_{ij}^{k}$ of \cref{eq:transition}
+        \State move to $j$ and mark it visited
         \EndWhile
         \State $L_k\gets$ length of the tour $T_k$ just built, back to the start included
         \State \textbf{if} $L_k<L^{\ast}$ \textbf{then} $T^{\ast}\gets T_k$; \; $L^{\ast}\gets L_k$
-      \EndFor
-      \State $\tau_{ij}\gets(1-\rho)\,\tau_{ij}$ for every edge \Comment{evaporation}
-      \For{each ant $k$ and each edge $\{i,j\}$ of $T_k$}
+        \EndFor
+        \State $\tau_{ij}\gets(1-\rho)\,\tau_{ij}$ for every edge \Comment{evaporation}
+        \For{each ant $k$ and each edge $\{i,j\}$ of $T_k$}
         \State $\tau_{ij}\gets\tau_{ij}+Q/L_k$ \Comment{reinforcement}
-      \EndFor
-    \EndFor
-    \State \Return $T^{\ast}$
-  \end{algorithmic}
+        \EndFor
+        \EndFor
+        \State \Return $T^{\ast}$
+    \end{algorithmic}
 \end{algorithm}
 
 \paragraph{Cost.}
@@ -436,7 +437,7 @@ A tour built by an ant usually contains obvious defects, such as two edges that 
 The 2-opt procedure~\cite{croes1958method} removes them: it looks for two edges
 $\{a,b\}$ and $\{c,d\}$ of the tour such that
 \[
-  d_{ac}+d_{bd} \;<\; d_{ab}+d_{cd},
+    d_{ac}+d_{bd} \;<\; d_{ab}+d_{cd},
 \]
 replaces them by $\{a,c\}$ and $\{b,d\}$, which amounts to reversing the part of the tour
 between $b$ and $c$, and repeats until no such pair exists. Applying it to every tour
@@ -451,26 +452,26 @@ algorithms for the TSP~\cite{stutzle2000mmas,dorigo2004aco}.
 retained after the study of \cref{sec:tuning}.
 
 \begin{table}[htbp]
-  \centering
-  \caption{Parameters of the algorithm.}
-  \label{tab:parameters}
-  \begin{tabular}{@{}llll@{}}
-    \toprule
-    Symbol & Option & Default & Role \\
-    \midrule
-    $m$        & \code{-{}-ants}         & $n$                   & number of ants \\
-    $t_{\max}$ & \code{-{}-iterations}   & 200                   & number of iterations \\
-    $\alpha$   & \code{-{}-alpha}        & 1                     & weight of the pheromone \\
-    $\beta$    & \code{-{}-beta}         & 3                     & weight of the visibility \\
-    $\rho$     & \code{-{}-rho}          & 0.5                   & evaporation rate \\
-    $Q$        & \code{-{}-deposit}      & 1                     & pheromone budget of an ant \\
-    $\tau_0$   & \code{-{}-tau0}         & $mQ/L_{\mathrm{nn}}$  & initial pheromone \\
-    $e$        & \code{-{}-elitist}      & 0                     & weight of the best-so-far tour \\
-    $q_0$      & \code{-{}-q0}           & 0                     & probability of a greedy move \\
-               & \code{-{}-local-search} & none                  & \code{none} or \code{2opt} \\
-               & \code{-{}-patience}     & off                   & iterations without progress before stopping \\
-    \bottomrule
-  \end{tabular}
+    \centering
+    \caption{Parameters of the algorithm.}
+    \label{tab:parameters}
+    \begin{tabular}{@{}llll@{}}
+        \toprule
+        Symbol     & Option                  & Default              & Role                                        \\
+        \midrule
+        $m$        & \code{-{}-ants}         & $n$                  & number of ants                              \\
+        $t_{\max}$ & \code{-{}-iterations}   & 200                  & number of iterations                        \\
+        $\alpha$   & \code{-{}-alpha}        & 1                    & weight of the pheromone                     \\
+        $\beta$    & \code{-{}-beta}         & 3                    & weight of the visibility                    \\
+        $\rho$     & \code{-{}-rho}          & 0.5                  & evaporation rate                            \\
+        $Q$        & \code{-{}-deposit}      & 1                    & pheromone budget of an ant                  \\
+        $\tau_0$   & \code{-{}-tau0}         & $mQ/L_{\mathrm{nn}}$ & initial pheromone                           \\
+        $e$        & \code{-{}-elitist}      & 0                    & weight of the best-so-far tour              \\
+        $q_0$      & \code{-{}-q0}           & 0                    & probability of a greedy move                \\
+                   & \code{-{}-local-search} & none                 & \code{none} or \code{2opt}                  \\
+                   & \code{-{}-patience}     & off                  & iterations without progress before stopping \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
 % =============================================================================
@@ -487,45 +488,45 @@ C11 and depends on nothing but the C library. It is developed with GCC and Clang
 avoids every construct that would prevent it from building with MSVC.
 
 \begin{figure}[htbp]
-  \centering
-  \begin{tikzpicture}[
-      module/.style={draw=slate, rounded corners=2pt, fill=white, minimum height=0.95cm,
-                     minimum width=2.75cm, align=center, font=\small},
-      dependency/.style={-{Stealth[length=4pt]}, slate, line width=0.5pt},
-      layer/.style={draw=mist, fill=paper, rounded corners=4pt, inner sep=9pt},
-      node distance=0.7cm and 0.45cm,
-    ]
-    \node[module] (colony) {\textbf{colony}\\[-1pt]\footnotesize Ant System};
-    \node[module, right=of colony] (heuristics) {\textbf{heuristics}\\[-1pt]\footnotesize NN, 2-opt};
-    \node[module, right=of heuristics] (exact) {\textbf{exact}\\[-1pt]\footnotesize Held--Karp};
-    \node[module, below=of colony] (rng) {\textbf{rng}\\[-1pt]\footnotesize xoshiro256**};
-    \node[module, right=of rng] (tour) {\textbf{tour}\\[-1pt]\footnotesize permutation};
-    \node[module, right=of tour] (instance) {\textbf{instance}\\[-1pt]\footnotesize matrix, files};
-    \node[module, below=of tour] (status) {\textbf{status}\\[-1pt]\footnotesize errors};
-    \node[module, above=1.25cm of heuristics, minimum width=5.6cm] (cli) {\textbf{aco-tsp}\\[-1pt]\footnotesize options, reports, output files};
-    \begin{scope}[on background layer]
-      \node[layer, fit=(colony)(exact)(rng)(instance)(status)] (library) {};
-    \end{scope}
-    \node[font=\footnotesize\color{slate}, anchor=south east] at (library.south east) {library \code{libaco}};
-    \draw[dependency] (cli) -- (colony.north);
-    \draw[dependency] (cli) -- (heuristics);
-    \draw[dependency] (cli) -- (exact.north);
-    \draw[dependency] (colony) -- (heuristics);
-    \draw[dependency] (colony) -- (rng);
-    \draw[dependency] (colony) -- (tour);
-    \draw[dependency] (heuristics) -- (tour);
-    \draw[dependency] (heuristics) -- (instance);
-    \draw[dependency] (exact) -- (instance);
-    \draw[dependency] (rng) -- (status);
-    \draw[dependency] (tour) -- (status);
-    \draw[dependency] (instance) -- (status);
-  \end{tikzpicture}
-  \caption{Modules and their main dependencies. An arrow from $A$ to $B$ means that $A$ uses $B$.}
-  \label{fig:architecture}
+    \centering
+    \begin{tikzpicture}[
+            module/.style={draw=slate, rounded corners=2pt, fill=white, minimum height=0.95cm,
+                    minimum width=2.75cm, align=center, font=\small},
+            dependency/.style={-{Stealth[length=4pt]}, slate, line width=0.5pt},
+            layer/.style={draw=mist, fill=paper, rounded corners=4pt, inner sep=9pt},
+            node distance=0.7cm and 0.45cm,
+        ]
+        \node[module] (colony) {\textbf{colony}\\[-1pt]\footnotesize Ant System};
+        \node[module, right=of colony] (heuristics) {\textbf{heuristics}\\[-1pt]\footnotesize NN, 2-opt};
+        \node[module, right=of heuristics] (exact) {\textbf{exact}\\[-1pt]\footnotesize Held--Karp};
+        \node[module, below=of colony] (rng) {\textbf{rng}\\[-1pt]\footnotesize xoshiro256**};
+        \node[module, right=of rng] (tour) {\textbf{tour}\\[-1pt]\footnotesize permutation};
+        \node[module, right=of tour] (instance) {\textbf{instance}\\[-1pt]\footnotesize matrix, files};
+        \node[module, below=of tour] (status) {\textbf{status}\\[-1pt]\footnotesize errors};
+        \node[module, above=1.25cm of heuristics, minimum width=5.6cm] (cli) {\textbf{aco-tsp}\\[-1pt]\footnotesize options, reports, output files};
+        \begin{scope}[on background layer]
+            \node[layer, fit=(colony)(exact)(rng)(instance)(status)] (library) {};
+        \end{scope}
+        \node[font=\footnotesize\color{slate}, anchor=south east] at (library.south east) {library \code{libaco}};
+        \draw[dependency] (cli) -- (colony.north);
+        \draw[dependency] (cli) -- (heuristics);
+        \draw[dependency] (cli) -- (exact.north);
+        \draw[dependency] (colony) -- (heuristics);
+        \draw[dependency] (colony) -- (rng);
+        \draw[dependency] (colony) -- (tour);
+        \draw[dependency] (heuristics) -- (tour);
+        \draw[dependency] (heuristics) -- (instance);
+        \draw[dependency] (exact) -- (instance);
+        \draw[dependency] (rng) -- (status);
+        \draw[dependency] (tour) -- (status);
+        \draw[dependency] (instance) -- (status);
+    \end{tikzpicture}
+    \caption{Modules and their main dependencies. An arrow from $A$ to $B$ means that $A$ uses $B$.}
+    \label{fig:architecture}
 \end{figure}
 
 Two kinds of types appear in the interface. An instance and a colony are \emph{opaque
-handles}: they can only be created by functions that validate their input, so the rest of
+    handles}: they can only be created by functions that validate their input, so the rest of
 the code can rely on a square, symmetric, finite, non-negative matrix with a zero diagonal
 without checking it again. Tours, parameters and statistics are plain structures. Every
 function that can fail returns a status code and, where an explanation is useful, fills in
@@ -557,18 +558,18 @@ Almost all the running time is spent choosing the next city of an ant, so three 
 there matter.
 
 \begin{description}[leftmargin=0pt]
-  \item[Attractiveness is tabulated.] The product $\tau_{ij}^{\alpha}\eta_{ij}^{\beta}$ of
-    \cref{eq:transition} does not change while the ants of one iteration are moving. It is
-    computed once per iteration for all edges, and $\eta_{ij}^{\beta}$ once per run. A
-    decision then costs additions and comparisons only; the 2023 code called \code{pow}
-    twice for every candidate of every decision.
-  \item[Unvisited cities are kept in a compact array.] Visiting a city removes it by
-    moving the last element of the array into its place, in constant time, so a decision
-    only looks at cities that are still candidates. The 2023 code searched the partial
-    route to find out whether a city had been visited, which made the construction of a
-    single tour cubic in $n$.
-  \item[Nothing is allocated.] The colony allocates its buffers when it is created and
-    reuses them at every iteration.
+    \item[Attractiveness is tabulated.] The product $\tau_{ij}^{\alpha}\eta_{ij}^{\beta}$ of
+          \cref{eq:transition} does not change while the ants of one iteration are moving. It is
+          computed once per iteration for all edges, and $\eta_{ij}^{\beta}$ once per run. A
+          decision then costs additions and comparisons only; the 2023 code called \code{pow}
+          twice for every candidate of every decision.
+    \item[Unvisited cities are kept in a compact array.] Visiting a city removes it by
+          moving the last element of the array into its place, in constant time, so a decision
+          only looks at cities that are still candidates. The 2023 code searched the partial
+          route to find out whether a city had been visited, which made the construction of a
+          single tour cubic in $n$.
+    \item[Nothing is allocated.] The colony allocates its buffers when it is created and
+          reuses them at every iteration.
 \end{description}
 
 \subsection{Numerical robustness}
@@ -576,17 +577,17 @@ there matter.
 The formulas hide a few traps, which the implementation handles explicitly.
 
 \begin{itemize}
-  \item The visibility is measured in units of the shortest positive distance of the
-    instance, $\eta_{ij}=d_{\min}/d_{ij}\in(0,1]$. Only ratios matter in
-    \cref{eq:transition}, and bounded values cannot overflow when raised to a large
-    power~$\beta$.
-  \item Two cities at the same place have $d_{ij}=0$. They receive the largest visibility
-    instead of a division by zero.
-  \item With extreme parameters every weight of a decision can underflow to zero. The ant
-    then chooses uniformly among the candidates rather than dividing by a zero sum.
-  \item In floating-point arithmetic two tours can each appear shorter than the other by a
-    rounding error, and 2-opt could alternate between them for ever. A move is accepted
-    only if it shortens the tour by more than a tiny fraction of the edges it removes.
+    \item The visibility is measured in units of the shortest positive distance of the
+          instance, $\eta_{ij}=d_{\min}/d_{ij}\in(0,1]$. Only ratios matter in
+          \cref{eq:transition}, and bounded values cannot overflow when raised to a large
+          power~$\beta$.
+    \item Two cities at the same place have $d_{ij}=0$. They receive the largest visibility
+          instead of a division by zero.
+    \item With extreme parameters every weight of a decision can underflow to zero. The ant
+          then chooses uniformly among the candidates rather than dividing by a zero sum.
+    \item In floating-point arithmetic two tours can each appear shorter than the other by a
+          rounding error, and 2-opt could alternate between them for ever. A move is accepted
+          only if it shortens the tour by more than a tiny fraction of the edges it removes.
 \end{itemize}
 
 \subsection{Randomness and reproducibility}
@@ -609,24 +610,24 @@ To judge the colony one needs something to compare it with. The library provides
 solvers for that purpose.
 
 \begin{description}[leftmargin=0pt]
-  \item[Nearest neighbour.] From a starting city, go to the closest unvisited city until
-    none is left~\cite{rosenkrantz1977analysis}. It is the simplest reasonable heuristic,
-    runs in $\bigO(n^2)$, and also provides the length $L_{\mathrm{nn}}$ of
-    \cref{eq:tau0}.
-  \item[Nearest neighbour followed by 2-opt.] The local search of
-    \cref{sec:local-search} applied to a greedy tour: a much stronger baseline.
-  \item[Exact dynamic programming.] The algorithm of Held and
-    Karp~\cite{held1962dynamic} computes, for every set $S$ of cities and every $j\in S$,
-    the length $C(S,j)$ of the shortest path that leaves city~1, visits exactly $S$ and
-    ends in $j$:
-    \[
-      C(\{j\},j)=d_{1j},\qquad
-      C(S,j)=\min_{k\in S\setminus\{j\}}\bigl(C(S\setminus\{j\},k)+d_{kj}\bigr).
-    \]
-    The optimum is $\min_j C(\{2,\dots,n\},j)+d_{j1}$. With $\bigO(n^2 2^n)$ time and
-    $\bigO(n\,2^n)$ memory it is limited to 20 cities, where it takes a quarter of a
-    second, but within that limit it provides the ground truth against which the heuristics
-    are tested.
+    \item[Nearest neighbour.] From a starting city, go to the closest unvisited city until
+          none is left~\cite{rosenkrantz1977analysis}. It is the simplest reasonable heuristic,
+          runs in $\bigO(n^2)$, and also provides the length $L_{\mathrm{nn}}$ of
+          \cref{eq:tau0}.
+    \item[Nearest neighbour followed by 2-opt.] The local search of
+          \cref{sec:local-search} applied to a greedy tour: a much stronger baseline.
+    \item[Exact dynamic programming.] The algorithm of Held and
+          Karp~\cite{held1962dynamic} computes, for every set $S$ of cities and every $j\in S$,
+          the length $C(S,j)$ of the shortest path that leaves city~1, visits exactly $S$ and
+          ends in $j$:
+          \[
+              C(\{j\},j)=d_{1j},\qquad
+              C(S,j)=\min_{k\in S\setminus\{j\}}\bigl(C(S\setminus\{j\},k)+d_{kj}\bigr).
+          \]
+          The optimum is $\min_j C(\{2,\dots,n\},j)+d_{j1}$. With $\bigO(n^2 2^n)$ time and
+          $\bigO(n\,2^n)$ memory it is limited to 20 cities, where it takes a quarter of a
+          second, but within that limit it provides the ground truth against which the heuristics
+          are tested.
 \end{description}
 
 When used as baselines in \cref{sec:experiments}, the two heuristics are run from each
@@ -641,32 +642,32 @@ the program wrote past the end of each of them. It only appeared to work because
 overwritten memory usually belonged to a neighbouring array.
 
 \begin{table}[htbp]
-  \centering
-  \caption{Defects of the 2023 program and their remedy in version 2.}
-  \label{tab:rewrite}
-  \small
-  \begin{tabular}{@{}p{0.47\linewidth}p{0.48\linewidth}@{}}
-    \toprule
-    2023 prototype & Version 2 \\
-    \midrule
-    Arrays of $N$ elements indexed from 1 to $N$: out-of-bounds reads and writes
-      & Zero-based indexing; whole test suite run under AddressSanitizer and Valgrind \\[3pt]
-    Matrices in variable-length arrays on the stack: the instance size is limited by the stack
-      & One heap block per matrix, allocated once and checked \\[3pt]
-    Roulette wheel drawn with \code{rand() \% 100}; generator not seeded
-      & 53-bit uniform draws from a seeded, portable generator \\[3pt]
-    Membership test by scanning the route: $\bigO(n^3)$ per ant
-      & Compact array of unvisited cities: $\bigO(n^2)$ per ant \\[3pt]
-    Instance, parameters and output files fixed at compile time
-      & Command-line options; nothing to recompile \\[3pt]
-    Input files neither checked for existence nor validated
-      & Parser with line-numbered diagnostics, fuzzed \\[3pt]
-    Four copies of the same \code{main} function (1600 lines in total)
-      & A library of independent modules, each with its tests \\[3pt]
-    Plot through a pipe to a hard-coded Windows path
-      & Portable data files and gnuplot scripts \\
-    \bottomrule
-  \end{tabular}
+    \centering
+    \caption{Defects of the 2023 program and their remedy in version 2.}
+    \label{tab:rewrite}
+    \small
+    \begin{tabular}{@{}p{0.47\linewidth}p{0.48\linewidth}@{}}
+        \toprule
+        2023 prototype & Version 2                                                                     \\
+        \midrule
+        Arrays of $N$ elements indexed from 1 to $N$: out-of-bounds reads and writes
+                       & Zero-based indexing; whole test suite run under AddressSanitizer and Valgrind \\[3pt]
+        Matrices in variable-length arrays on the stack: the instance size is limited by the stack
+                       & One heap block per matrix, allocated once and checked                         \\[3pt]
+        Roulette wheel drawn with \code{rand() \% 100}; generator not seeded
+                       & 53-bit uniform draws from a seeded, portable generator                        \\[3pt]
+        Membership test by scanning the route: $\bigO(n^3)$ per ant
+                       & Compact array of unvisited cities: $\bigO(n^2)$ per ant                       \\[3pt]
+        Instance, parameters and output files fixed at compile time
+                       & Command-line options; nothing to recompile                                    \\[3pt]
+        Input files neither checked for existence nor validated
+                       & Parser with line-numbered diagnostics, fuzzed                                 \\[3pt]
+        Four copies of the same \code{main} function (1600 lines in total)
+                       & A library of independent modules, each with its tests                         \\[3pt]
+        Plot through a pipe to a hard-coded Windows path
+                       & Portable data files and gnuplot scripts                                       \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 
 \subsection{Verification}
@@ -676,22 +677,22 @@ answer looks just like a mediocre one. The project therefore invests in several
 independent layers of verification.
 
 \begin{itemize}
-  \item \textbf{Unit tests} (73, in five programs) exercise each module through its public
-    interface, including the error paths. The exact solver is checked against brute-force
-    enumeration; 2-opt is checked on points placed on a circle, where the optimum is the
-    perimeter of a regular polygon; one iteration of the pheromone update is checked
-    against the value of \cref{eq:update} computed by hand.
-  \item \textbf{Properties of the search} are tested rather than particular outputs: the
-    same seed gives the same run, the best tour never gets worse, the trails stay
-    symmetric and positive, and on small instances the result stays within a stated margin
-    of the proven optimum.
-  \item \textbf{End-to-end tests} (44 checks) run the command-line tool and verify its
-    exit status, its messages and the files it writes.
-  \item \textbf{Fuzzing.} The parser is the only code that reads untrusted data. A
-    libFuzzer harness feeds it mutated files under AddressSanitizer and
-    UndefinedBehaviorSanitizer; several million inputs are tried on every push.
-  \item \textbf{Analysis.} The code compiles without warnings under a strict warning set
-    with GCC and Clang, and passes clang-tidy with every finding treated as an error.
+    \item \textbf{Unit tests} (73, in five programs) exercise each module through its public
+          interface, including the error paths. The exact solver is checked against brute-force
+          enumeration; 2-opt is checked on points placed on a circle, where the optimum is the
+          perimeter of a regular polygon; one iteration of the pheromone update is checked
+          against the value of \cref{eq:update} computed by hand.
+    \item \textbf{Properties of the search} are tested rather than particular outputs: the
+          same seed gives the same run, the best tour never gets worse, the trails stay
+          symmetric and positive, and on small instances the result stays within a stated margin
+          of the proven optimum.
+    \item \textbf{End-to-end tests} (44 checks) run the command-line tool and verify its
+          exit status, its messages and the files it writes.
+    \item \textbf{Fuzzing.} The parser is the only code that reads untrusted data. A
+          libFuzzer harness feeds it mutated files under AddressSanitizer and
+          UndefinedBehaviorSanitizer; several million inputs are tried on every push.
+    \item \textbf{Analysis.} The code compiles without warnings under a strict warning set
+          with GCC and Clang, and passes clang-tidy with every finding treated as an error.
 \end{itemize}
 
 The tests cover \SI{93.6}{\percent} of the lines and every function of the library and of
@@ -733,19 +734,19 @@ their optimum with the exact solver, and ran each variant once. \Cref{tab:exact}
 the proportion of instances solved to optimality and the relative excess over the optimum.
 
 \begin{table}[htbp]
-  \centering
-  \caption{Small random instances: frequency of reaching the proven optimum, and excess
-    length over it.}
-  \label{tab:exact}
-  \begin{tabular}{@{}rrrrrrr@{}}
-    \toprule
-    & & \multicolumn{3}{c}{Ant System} & \multicolumn{2}{c}{Ant System + 2-opt} \\
-    \cmidrule(lr){3-5}\cmidrule(l){6-7}
-    Cities & Instances & Optimal & Mean excess & Worst excess & Optimal & Mean excess \\
-    \midrule
-    \inputrows{data/exact_rows.tex}
-    \bottomrule
-  \end{tabular}
+    \centering
+    \caption{Small random instances: frequency of reaching the proven optimum, and excess
+        length over it.}
+    \label{tab:exact}
+    \begin{tabular}{@{}rrrrrrr@{}}
+        \toprule
+               &           & \multicolumn{3}{c}{Ant System} & \multicolumn{2}{c}{Ant System + 2-opt}                                        \\
+        \cmidrule(lr){3-5}\cmidrule(l){6-7}
+        Cities & Instances & Optimal                        & Mean excess                            & Worst excess & Optimal & Mean excess \\
+        \midrule
+        \inputrows{data/exact_rows.tex}
+        \bottomrule
+    \end{tabular}
 \end{table}
 
 Plain Ant System reaches the optimum in about nine runs out of ten and is on average
@@ -762,61 +763,61 @@ System, each varied alone around the default configuration, on the random instan
 cities.
 
 \begin{figure}[htbp]
-  \centering
-  \begin{subfigure}{0.40\linewidth}
-    \raggedleft
-    \begin{tikzpicture}
-      \begin{axis}[sensitivity, xlabel={$\alpha$}, ylabel={mean tour length},
-                   ymin=8300, ymax=9700, xmin=0.3, xmax=4.2, xtick={0.5,1,2,3,4},
-                   scaled y ticks=false, yticklabel style={/pgf/number format/fixed, /pgf/number format/1000 sep={\,}}]
-        \addplot[rust, mark=*, mark size=1.4pt, error bars/.cd, y dir=both, y explicit]
-          table[x index=0, y index=1, y error index=2] {data/sensitivity_alpha.dat};
-      \end{axis}
-    \end{tikzpicture}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.29\linewidth}
     \centering
-    \begin{tikzpicture}
-      \begin{axis}[sensitivity, xlabel={$\beta$},
-                   ymin=8300, ymax=9700, xmin=0.5, xmax=10.5, xtick={1,2,4,6,8,10},
-                   yticklabels={}]
-        \addplot[ocean, mark=*, mark size=1.4pt, error bars/.cd, y dir=both, y explicit]
-          table[x index=0, y index=1, y error index=2] {data/sensitivity_beta.dat};
-      \end{axis}
-    \end{tikzpicture}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.29\linewidth}
-    \centering
-    \begin{tikzpicture}
-      \begin{axis}[sensitivity, xlabel={$\rho$},
-                   ymin=8300, ymax=9700, xmin=-0.04, xmax=1.04, xtick={0,0.25,0.5,0.75,1},
-                   yticklabels={}]
-        \addplot[moss, mark=*, mark size=1.4pt, error bars/.cd, y dir=both, y explicit]
-          table[x index=0, y index=1, y error index=2] {data/sensitivity_rho.dat};
-      \end{axis}
-    \end{tikzpicture}
-  \end{subfigure}
-  \caption{Sensitivity of Ant System to its three main parameters on 100 random cities.
-    Each point is the mean of \ExperimentRuns{} runs and the bars show one standard
-    deviation. The points $\alpha=0$ (mean \num{12123}) and $\beta=0$
-    (mean \num{41867}) lie far above the frame.}
-  \label{fig:sensitivity}
+    \begin{subfigure}{0.40\linewidth}
+        \raggedleft
+        \begin{tikzpicture}
+            \begin{axis}[sensitivity, xlabel={$\alpha$}, ylabel={mean tour length},
+                    ymin=8300, ymax=9700, xmin=0.3, xmax=4.2, xtick={0.5,1,2,3,4},
+                    scaled y ticks=false, yticklabel style={/pgf/number format/fixed, /pgf/number format/1000 sep={\,}}]
+                \addplot[rust, mark=*, mark size=1.4pt, error bars/.cd, y dir=both, y explicit]
+                table[x index=0, y index=1, y error index=2] {data/sensitivity_alpha.dat};
+            \end{axis}
+        \end{tikzpicture}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.29\linewidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[sensitivity, xlabel={$\beta$},
+                    ymin=8300, ymax=9700, xmin=0.5, xmax=10.5, xtick={1,2,4,6,8,10},
+                    yticklabels={}]
+                \addplot[ocean, mark=*, mark size=1.4pt, error bars/.cd, y dir=both, y explicit]
+                table[x index=0, y index=1, y error index=2] {data/sensitivity_beta.dat};
+            \end{axis}
+        \end{tikzpicture}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.29\linewidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[sensitivity, xlabel={$\rho$},
+                    ymin=8300, ymax=9700, xmin=-0.04, xmax=1.04, xtick={0,0.25,0.5,0.75,1},
+                    yticklabels={}]
+                \addplot[moss, mark=*, mark size=1.4pt, error bars/.cd, y dir=both, y explicit]
+                table[x index=0, y index=1, y error index=2] {data/sensitivity_rho.dat};
+            \end{axis}
+        \end{tikzpicture}
+    \end{subfigure}
+    \caption{Sensitivity of Ant System to its three main parameters on 100 random cities.
+        Each point is the mean of \ExperimentRuns{} runs and the bars show one standard
+        deviation. The points $\alpha=0$ (mean \num{12123}) and $\beta=0$
+        (mean \num{41867}) lie far above the frame.}
+    \label{fig:sensitivity}
 \end{figure}
 
 \begin{description}[leftmargin=0pt]
-  \item[Both sources of information are necessary.] Without pheromone ($\alpha=0$) the
-    mean tour is \SI{44}{\percent} longer than with $\alpha=1$; without
-    visibility ($\beta=0$) it is five times longer, barely better than a random tour. The
-    greedy information matters most, but it is the pheromone that turns a randomised greedy
-    search into an optimiser.
-  \item[$\alpha=1$ is the best value.] Larger values make the ants follow the trails too
-    faithfully: the mean degrades and, tellingly, the spread between runs doubles, the sign
-    of a search that locks onto whichever tour came first.
-  \item[$\beta$ has a broad optimum between 2 and 5.] The original program used $\beta=1$
-    in one of its versions, which costs \SI{16}{\percent} here.
-  \item[$\rho$ hardly matters above 0.1.] Differences in that range are of the order of
-    the noise. Very slow evaporation ($\rho\le 0.05$) costs one to two percent with a
-    budget of 200 iterations: the early, poor tours are forgotten too slowly.
+    \item[Both sources of information are necessary.] Without pheromone ($\alpha=0$) the
+          mean tour is \SI{44}{\percent} longer than with $\alpha=1$; without
+          visibility ($\beta=0$) it is five times longer, barely better than a random tour. The
+          greedy information matters most, but it is the pheromone that turns a randomised greedy
+          search into an optimiser.
+    \item[$\alpha=1$ is the best value.] Larger values make the ants follow the trails too
+          faithfully: the mean degrades and, tellingly, the spread between runs doubles, the sign
+          of a search that locks onto whichever tour came first.
+    \item[$\beta$ has a broad optimum between 2 and 5.] The original program used $\beta=1$
+          in one of its versions, which costs \SI{16}{\percent} here.
+    \item[$\rho$ hardly matters above 0.1.] Differences in that range are of the order of
+          the noise. Very slow evaporation ($\rho\le 0.05$) costs one to two percent with a
+          budget of 200 iterations: the early, poor tours are forgotten too slowly.
 \end{description}
 
 We retain $\alpha=1$, $\beta=3$ and $\rho=0.5$, which agree with the values recommended in
@@ -825,76 +826,76 @@ the literature~\cite{dorigo2004aco}.
 \subsection{Results on the instances of the assignment}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Tour lengths on the instances of the assignment. The baselines keep the best of
-    $n$ starting cities; the colony columns give the mean and the best of
-    \ExperimentRuns{} runs of \ExperimentIterations{} iterations. The optimum is known
-    for the first three instances only.}
-  \label{tab:course}
-  \small
-  \setlength{\tabcolsep}{5pt}
-  \begin{tabular}{@{}lrr rr rr rr rr@{}}
-    \toprule
-    & & & \multicolumn{2}{c}{Baselines} & \multicolumn{2}{c}{Ant System}
-        & \multicolumn{2}{c}{Elitist AS} & \multicolumn{2}{c}{AS + 2-opt} \\
-    \cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(l){10-11}
-    Instance & $n$ & Optimum & NN & NN + 2-opt & mean & best & mean & best & mean & best \\
-    \midrule
-    \inputrows{data/course_rows.tex}
-    \bottomrule
-  \end{tabular}
+    \centering
+    \caption{Tour lengths on the instances of the assignment. The baselines keep the best of
+        $n$ starting cities; the colony columns give the mean and the best of
+        \ExperimentRuns{} runs of \ExperimentIterations{} iterations. The optimum is known
+        for the first three instances only.}
+    \label{tab:course}
+    \small
+    \setlength{\tabcolsep}{5pt}
+    \begin{tabular}{@{}lrr rr rr rr rr@{}}
+        \toprule
+                 &                                &                                & \multicolumn{2}{c}{Baselines} & \multicolumn{2}{c}{Ant System}
+                 & \multicolumn{2}{c}{Elitist AS} & \multicolumn{2}{c}{AS + 2-opt}                                                                                                            \\
+        \cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(l){10-11}
+        Instance & $n$                            & Optimum                        & NN                            & NN + 2-opt                     & mean & best & mean & best & mean & best \\
+        \midrule
+        \inputrows{data/course_rows.tex}
+        \bottomrule
+    \end{tabular}
 \end{table}
 
 \Cref{tab:course} compares the three variants with the two baselines. Four observations
 can be made.
 
 \begin{enumerate}
-  \item \textbf{The small instances are solved.} For 5, 10 and 20 cities the optimum is
-    known; every variant finds it on the first two, and on \code{tsp020} the hybrid finds
-    it in all \ExperimentRuns{} runs while plain Ant System does so in its best run.
-  \item \textbf{Ant System clearly beats the greedy heuristic}, by
-    \SIrange{13}{23}{\percent}, which is what the 2023 report observed
-    qualitatively.
-  \item \textbf{Plain Ant System does not beat a good local search.} Nearest neighbour
-    followed by 2-opt, restarted from every city, does as well or better on every instance,
-    and does so in a few milliseconds. This sobering comparison is absent from the original
-    report, which had no baseline at all. Elitism narrows the gap and overtakes the
-    baseline on three of the five larger instances, including the two largest, where
-    focusing the search pays off.
-  \item \textbf{The hybrid is the best method on every instance.} From 20 cities upwards
-    its mean tour is \SIrange{2.9}{11.9}{\percent} shorter than the stronger baseline, and
-    it is also the most stable, its standard deviation being several times smaller than
-    that of Ant System. The ants and the local search complement each other. The price is
-    time: about half a second for 100 cities, where the baseline needs three milliseconds
-    and plain Ant System \SI{0.15}{\second}.
+    \item \textbf{The small instances are solved.} For 5, 10 and 20 cities the optimum is
+          known; every variant finds it on the first two, and on \code{tsp020} the hybrid finds
+          it in all \ExperimentRuns{} runs while plain Ant System does so in its best run.
+    \item \textbf{Ant System clearly beats the greedy heuristic}, by
+          \SIrange{13}{23}{\percent}, which is what the 2023 report observed
+          qualitatively.
+    \item \textbf{Plain Ant System does not beat a good local search.} Nearest neighbour
+          followed by 2-opt, restarted from every city, does as well or better on every instance,
+          and does so in a few milliseconds. This sobering comparison is absent from the original
+          report, which had no baseline at all. Elitism narrows the gap and overtakes the
+          baseline on three of the five larger instances, including the two largest, where
+          focusing the search pays off.
+    \item \textbf{The hybrid is the best method on every instance.} From 20 cities upwards
+          its mean tour is \SIrange{2.9}{11.9}{\percent} shorter than the stronger baseline, and
+          it is also the most stable, its standard deviation being several times smaller than
+          that of Ant System. The ants and the local search complement each other. The price is
+          time: about half a second for 100 cities, where the baseline needs three milliseconds
+          and plain Ant System \SI{0.15}{\second}.
 \end{enumerate}
 
 \subsection{Convergence}
 
 \begin{figure}[htbp]
-  \centering
-  \begin{tikzpicture}
-    \begin{axis}[report, height=6.4cm, width=0.92\linewidth,
-                 xlabel={iteration}, ylabel={best tour length so far (mean of \ExperimentRuns{} runs)},
-                 xmin=0, xmax=200, ymin=7900, ymax=10400,
-                 scaled y ticks=false,
-                 yticklabel style={/pgf/number format/fixed, /pgf/number format/1000 sep={\,}},
-                 legend pos=north east]
-      \addplot[rust] table[x index=0, y index=1] {data/convergence.dat};
-      \addlegendentry{Ant System}
-      \addplot[ocean] table[x index=0, y index=2] {data/convergence.dat};
-      \addlegendentry{Elitist Ant System}
-      \addplot[moss] table[x index=0, y index=3] {data/convergence.dat};
-      \addlegendentry{Ant System + 2-opt}
-      \addplot[slate, dashed, line width=0.6pt, domain=0:200, samples=2] {\UniformNearestNeighbour};
-      \addlegendentry{nearest neighbour}
-      \addplot[slate, densely dotted, line width=0.8pt, domain=0:200, samples=2] {\UniformTwoOpt};
-      \addlegendentry{nearest neighbour + 2-opt}
-    \end{axis}
-  \end{tikzpicture}
-  \caption{Convergence on 100 random cities. The first iterations of the two variants
-    without local search, above \num{13000}, are cut off.}
-  \label{fig:convergence}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[report, height=6.4cm, width=0.92\linewidth,
+                xlabel={iteration}, ylabel={best tour length so far (mean of \ExperimentRuns{} runs)},
+                xmin=0, xmax=200, ymin=7900, ymax=10400,
+                scaled y ticks=false,
+                yticklabel style={/pgf/number format/fixed, /pgf/number format/1000 sep={\,}},
+                legend pos=north east]
+            \addplot[rust] table[x index=0, y index=1] {data/convergence.dat};
+            \addlegendentry{Ant System}
+            \addplot[ocean] table[x index=0, y index=2] {data/convergence.dat};
+            \addlegendentry{Elitist Ant System}
+            \addplot[moss] table[x index=0, y index=3] {data/convergence.dat};
+            \addlegendentry{Ant System + 2-opt}
+            \addplot[slate, dashed, line width=0.6pt, domain=0:200, samples=2] {\UniformNearestNeighbour};
+            \addlegendentry{nearest neighbour}
+            \addplot[slate, densely dotted, line width=0.8pt, domain=0:200, samples=2] {\UniformTwoOpt};
+            \addlegendentry{nearest neighbour + 2-opt}
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Convergence on 100 random cities. The first iterations of the two variants
+        without local search, above \num{13000}, are cut off.}
+    \label{fig:convergence}
 \end{figure}
 
 \Cref{fig:convergence} follows the best tour found so far on the random instance. Plain
@@ -914,51 +915,51 @@ recognisable by the long edges it needs at the end to collect the cities it left
 the tour of the hybrid has no crossing and no detour of that kind.
 
 \begin{figure}[htbp]
-  \centering
-  \begin{subfigure}{0.48\linewidth}
     \centering
-    \begin{tikzpicture}
-      \begin{axis}[tour]
-        \addplot[slate, line width=0.8pt] table[x index=0, y index=1] {data/tour_nearest_neighbour.dat};
-        \addplot[only marks, mark=*, mark size=1pt, ink] table[x index=0, y index=1] {data/tour_nearest_neighbour.dat};
-      \end{axis}
-    \end{tikzpicture}
-    \caption{Nearest neighbour: \num{\UniformNearestNeighbour}}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.48\linewidth}
-    \centering
-    \begin{tikzpicture}
-      \begin{axis}[tour]
-        \addplot[rust, line width=0.8pt] table[x index=0, y index=1] {data/tour_hybrid.dat};
-        \addplot[only marks, mark=*, mark size=1pt, ink] table[x index=0, y index=1] {data/tour_hybrid.dat};
-      \end{axis}
-    \end{tikzpicture}
-    \caption{Ant System + 2-opt: \num{\UniformHybridTour}}
-  \end{subfigure}
-  \caption{Two tours of the same 100 random cities.}
-  \label{fig:tours}
+    \begin{subfigure}{0.48\linewidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[tour]
+                \addplot[slate, line width=0.8pt] table[x index=0, y index=1] {data/tour_nearest_neighbour.dat};
+                \addplot[only marks, mark=*, mark size=1pt, ink] table[x index=0, y index=1] {data/tour_nearest_neighbour.dat};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Nearest neighbour: \num{\UniformNearestNeighbour}}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.48\linewidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[tour]
+                \addplot[rust, line width=0.8pt] table[x index=0, y index=1] {data/tour_hybrid.dat};
+                \addplot[only marks, mark=*, mark size=1pt, ink] table[x index=0, y index=1] {data/tour_hybrid.dat};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Ant System + 2-opt: \num{\UniformHybridTour}}
+    \end{subfigure}
+    \caption{Two tours of the same 100 random cities.}
+    \label{fig:tours}
 \end{figure}
 
 \subsection{Running time}
 
 \begin{figure}[htbp]
-  \centering
-  \begin{tikzpicture}
-    \begin{loglogaxis}[report, height=5.8cm, width=0.62\linewidth,
-                       xlabel={number of cities $n$}, ylabel={seconds per iteration},
-                       xmin=20, xmax=1000, ymin=4e-6, ymax=1,
-                       xtick={25,50,100,200,400,800}, xticklabels={25,50,100,200,400,800},
-                       ytick={1e-5,1e-4,1e-3,1e-2,1e-1,1},
-                       minor tick style={draw=none},
-                       legend pos=north west]
-      \addplot[rust, only marks, mark=*, mark size=2pt] table[x index=0, y index=2] {data/scaling.dat};
-      \addlegendentry{measured}
-      \addplot[slate, dashed, line width=0.6pt, domain=20:1000, samples=2] {7.26e-10*x^3};
-      \addlegendentry{$c\,n^3$}
-    \end{loglogaxis}
-  \end{tikzpicture}
-  \caption{Time of one iteration of Ant System with one ant per city.}
-  \label{fig:scaling}
+    \centering
+    \begin{tikzpicture}
+        \begin{loglogaxis}[report, height=5.8cm, width=0.62\linewidth,
+                xlabel={number of cities $n$}, ylabel={seconds per iteration},
+                xmin=20, xmax=1000, ymin=4e-6, ymax=1,
+                xtick={25,50,100,200,400,800}, xticklabels={25,50,100,200,400,800},
+                ytick={1e-5,1e-4,1e-3,1e-2,1e-1,1},
+                minor tick style={draw=none},
+                legend pos=north west]
+            \addplot[rust, only marks, mark=*, mark size=2pt] table[x index=0, y index=2] {data/scaling.dat};
+            \addlegendentry{measured}
+            \addplot[slate, dashed, line width=0.6pt, domain=20:1000, samples=2] {7.26e-10*x^3};
+            \addlegendentry{$c\,n^3$}
+        \end{loglogaxis}
+    \end{tikzpicture}
+    \caption{Time of one iteration of Ant System with one ant per city.}
+    \label{fig:scaling}
 \end{figure}
 
 \Cref{fig:scaling} plots the time of one iteration against the size of the instance, with
