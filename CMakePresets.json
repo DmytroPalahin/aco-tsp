@@ -67,10 +67,26 @@
   ],
   "buildPresets": [
     { "name": "dev", "configurePreset": "dev", "configuration": "Debug" },
-    { "name": "release", "configurePreset": "release", "configuration": "Release" },
-    { "name": "sanitize", "configurePreset": "sanitize", "configuration": "RelWithDebInfo" },
-    { "name": "coverage", "configurePreset": "coverage", "configuration": "Debug" },
-    { "name": "fuzz", "configurePreset": "fuzz", "configuration": "RelWithDebInfo" }
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "configuration": "Release"
+    },
+    {
+      "name": "sanitize",
+      "configurePreset": "sanitize",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "coverage",
+      "configurePreset": "coverage",
+      "configuration": "Debug"
+    },
+    {
+      "name": "fuzz",
+      "configurePreset": "fuzz",
+      "configuration": "RelWithDebInfo"
+    }
   ],
   "testPresets": [
     {
@@ -79,7 +95,12 @@
       "output": { "outputOnFailure": true },
       "execution": { "noTestsAction": "error" }
     },
-    { "name": "dev", "inherits": "base", "configurePreset": "dev", "configuration": "Debug" },
+    {
+      "name": "dev",
+      "inherits": "base",
+      "configurePreset": "dev",
+      "configuration": "Debug"
+    },
     {
       "name": "release",
       "inherits": "base",
