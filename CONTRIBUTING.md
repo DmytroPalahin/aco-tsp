@@ -30,7 +30,7 @@ errors, compiles it and runs every test. The other presets:
 | `dev` | Debug build, warnings are errors | `cmake --workflow --preset dev` |
 | `release` | Optimised build | `cmake --workflow --preset release` |
 | `sanitize` | AddressSanitizer + UndefinedBehaviorSanitizer | `cmake --workflow --preset sanitize` |
-| `coverage` | Instrumented for coverage | `cmake --preset coverage` |
+| `coverage` | Coverage report, fails below 90 % of the lines | `cmake --workflow --preset coverage` |
 | `fuzz` | libFuzzer harness for the parser (Clang) | `cmake --preset fuzz` |
 
 Build trees live in `build/<preset>`.
@@ -50,6 +50,10 @@ ctest --preset dev --label-regex cli
 cmake --build build/dev --target format
 find src tests examples -name '*.c' | xargs clang-tidy -p build/dev --quiet
 
+# Measure the coverage: a table per file, and the annotated sources in
+# build/coverage/coverage-report/html
+cmake --workflow --preset coverage
+
 # Fuzz the parser for a minute
 cmake --preset fuzz && cmake --build --preset fuzz
 mkdir -p /tmp/corpus && cp fuzz/corpus/* /tmp/corpus/
@@ -59,6 +63,9 @@ build/fuzz/fuzz/fuzz_instance_parse -max_len=2048 -max_total_time=60 /tmp/corpus
 cmake --build build/dev --target docs
 cmake --build build/dev --target report
 ```
+
+The coverage report works with Clang (`llvm-cov`, which comes with the
+compiler) and with GCC (which needs [gcovr](https://gcovr.com)).
 
 ## Making a change
 

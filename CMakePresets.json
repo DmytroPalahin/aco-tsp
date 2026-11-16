@@ -47,7 +47,8 @@
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "ACO_ENABLE_COVERAGE": "ON"
+        "ACO_ENABLE_COVERAGE": "ON",
+        "ACO_COVERAGE_MINIMUM": "90"
       }
     },
     {
@@ -81,6 +82,12 @@
       "name": "coverage",
       "configurePreset": "coverage",
       "configuration": "Debug"
+    },
+    {
+      "name": "coverage-report",
+      "configurePreset": "coverage",
+      "configuration": "Debug",
+      "targets": ["coverage"]
     },
     {
       "name": "fuzz",
@@ -150,6 +157,14 @@
         { "type": "configure", "name": "sanitize" },
         { "type": "build", "name": "sanitize" },
         { "type": "test", "name": "sanitize" }
+      ]
+    },
+    {
+      "name": "coverage",
+      "displayName": "Build, run the tests and report their coverage",
+      "steps": [
+        { "type": "configure", "name": "coverage" },
+        { "type": "build", "name": "coverage-report" }
       ]
     }
   ]

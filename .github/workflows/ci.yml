@@ -174,46 +174,30 @@ jobs:
   coverage:
     name: Coverage
     runs-on: macos-15
-    env:
-      MINIMUM_LINE_COVERAGE: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Build with instrumentation
-        run: cmake --preset coverage && cmake --build --preset coverage --parallel
-      - name: Run the tests
-        run: ctest --preset coverage
-        env:
-          LLVM_PROFILE_FILE: ${{ github.workspace }}/build/coverage/profiles/%p-%m.profraw
+      # The command a developer runs. The floor is the ACO_COVERAGE_MINIMUM
+      # of the "coverage" preset.
+      - name: Build, test and measure
+        run: cmake --workflow --preset coverage
+      # Published even when the floor is missed: that is when it is needed.
       - name: Summarise
-        working-directory: build/coverage
+        if: ${{ !cancelled() }}
         run: |
-          xcrun llvm-profdata merge -sparse profiles/*.profraw -o coverage.profdata
-          objects=(aco-tsp)
-          for test in tests/test_*; do
-            if [[ -f $test && -x $test ]]; then
-              objects+=(-object "$test")
-            fi
-          done
-          options=(-instr-profile=coverage.profdata '-ignore-filename-regex=(tests|examples)/')
-
-          {
-            echo '### Test coverage'
-            echo '```'
-            xcrun llvm-cov report "${objects[@]}" "${options[@]}" | sed "s|$GITHUB_WORKSPACE/||"
-            echo '```'
-          } >>"$GITHUB_STEP_SUMMARY"
-          xcrun llvm-cov show "${objects[@]}" "${options[@]}" -format=html -output-dir=html
-
-          lines=$(xcrun llvm-cov export "${objects[@]}" "${options[@]}" -summary-only |
-            jq '.data[0].totals.lines.percent')
-          echo "line coverage: $lines %"
-          jq --null-input --exit-status --argjson lines "$lines" \
-            --argjson minimum "$MINIMUM_LINE_COVERAGE" '$lines >= $minimum' >/dev/null ||
-            { echo "::error::line coverage $lines % is below $MINIMUM_LINE_COVERAGE %"; exit 1; }
+          summary=build/coverage/coverage-report/summary.txt
+          if [[ -f $summary ]]; then
+            {
+              echo '### Test coverage'
+              echo '```'
+              cat "$summary"
+              echo '```'
+            } >>"$GITHUB_STEP_SUMMARY"
+          fi
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
         with:
           name: coverage-report
-          path: build/coverage/html
+          path: build/coverage/coverage-report/html
 
   # -------------------------------------------------------------------------
   # Documentation: API reference and the written report.

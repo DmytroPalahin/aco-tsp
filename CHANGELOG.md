@@ -7,6 +7,13 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `cmake --workflow --preset coverage` builds with instrumentation, runs the
+  tests, prints the coverage of each file, writes the annotated sources and
+  fails below 90 % of the lines (`ACO_COVERAGE_MINIMUM`). It works with
+  Clang and with GCC, and CI runs the same command.
+
 ## [2.0.0] - 2026-11-13
 
 A complete rewrite of the 2023 coursework. No source file of version 1 is
