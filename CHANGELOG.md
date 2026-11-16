@@ -14,6 +14,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   fails below 90 % of the lines (`ACO_COVERAGE_MINIMUM`). It works with
   Clang and with GCC, and CI runs the same command.
 
+### Changed
+
+- Configuring the fuzzing harness with a Clang that has no libFuzzer, such
+  as Apple's, stops with an explanation instead of failing at link time.
+
 ## [2.0.0] - 2026-11-13
 
 A complete rewrite of the 2023 coursework. No source file of version 1 is

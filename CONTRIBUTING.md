@@ -64,6 +64,14 @@ cmake --build build/dev --target docs
 cmake --build build/dev --target report
 ```
 
+The `fuzz` preset needs a Clang that comes with libFuzzer. Apple's does not,
+and the configure step stops with a message that says so. On macOS, install
+LLVM with Homebrew (`brew install llvm`) and name its compiler:
+
+```bash
+cmake --preset fuzz --fresh -DCMAKE_C_COMPILER="$(brew --prefix llvm)/bin/clang"
+```
+
 The coverage report works with Clang (`llvm-cov`, which comes with the
 compiler) and with GCC (which needs [gcovr](https://gcovr.com)).
 
