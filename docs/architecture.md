@@ -150,6 +150,7 @@ the matrix, so a ten-byte file cannot request gigabytes.
 | Properties | `tests/test_colony.c` | Determinism, monotonic best tour, pheromone formula on a hand-computed case |
 | End to end | `tests/cli/run.cmake` | Exit codes, messages and output files of the tool |
 | Fuzzing | `fuzz/` | The parser, under AddressSanitizer and UndefinedBehaviorSanitizer |
+| Coverage | `coverage` preset | The share of the lines the suite executes, with a 90 % floor |
 | Dynamic analysis | CI | The whole suite under ASan/UBSan and under Valgrind |
 | Static analysis | CI | clang-tidy with warnings as errors, CodeQL |
 

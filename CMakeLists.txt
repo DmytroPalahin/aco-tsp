@@ -19,6 +19,9 @@ option(ACO_BUILD_EXAMPLES "Build the example programs" ${PROJECT_IS_TOP_LEVEL})
 option(ACO_BUILD_FUZZERS "Build the libFuzzer harnesses (requires Clang)" OFF)
 option(ACO_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(ACO_ENABLE_COVERAGE "Instrument the build to measure test coverage" OFF)
+set(ACO_COVERAGE_MINIMUM
+    "0"
+    CACHE STRING "Line coverage, in percent, below which the \"coverage\" target fails")
 set(ACO_SANITIZERS
     ""
     CACHE STRING "Semicolon-separated sanitizers to enable, e.g. \"address;undefined\"")
