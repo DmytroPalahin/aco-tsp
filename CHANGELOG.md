@@ -7,12 +7,20 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-11-16
+
+The library and the tool are unchanged. This release makes every command of
+the contributing guide work as it stands, on macOS included.
+
 ### Added
 
 - `cmake --workflow --preset coverage` builds with instrumentation, runs the
   tests, prints the coverage of each file, writes the annotated sources and
   fails below 90 % of the lines (`ACO_COVERAGE_MINIMUM`). It works with
   Clang and with GCC, and CI runs the same command.
+- `cmake --workflow --preset fuzz` builds the harness and fuzzes the parser
+  for one minute, as CI does. On macOS the preset finds Homebrew's LLVM by
+  itself, because Apple's Clang has no libFuzzer.
 
 ### Changed
 
@@ -95,6 +103,7 @@ The coursework as submitted in February 2023 and first published in May 2023:
 Ant System for the delivery-tour problem, written by Dmytro Palahin with a
 classmate. See `archive/2023-coursework`.
 
-[Unreleased]: https://github.com/DmytroPalahin/aco-tsp/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/DmytroPalahin/aco-tsp/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/DmytroPalahin/aco-tsp/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/DmytroPalahin/aco-tsp/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/DmytroPalahin/aco-tsp/releases/tag/v1.0.0

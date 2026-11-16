@@ -116,25 +116,20 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Build
-        run: cmake --preset fuzz && cmake --build --preset fuzz --parallel
       # A short smoke run: long enough to catch regressions in the parser,
       # short enough to run on every push.
-      - name: Fuzz for one minute
-        run: |
-          mkdir corpus && cp fuzz/corpus/* corpus/
-          build/fuzz/fuzz/fuzz_instance_parse -max_len=2048 -max_total_time=60 \
-            -print_final_stats=1 corpus
+      - name: Build and fuzz for one minute
+        run: cmake --workflow --preset fuzz
       - name: Keep the crashing input
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: fuzz-crash
           path: |
-            crash-*
-            leak-*
-            timeout-*
-            oom-*
+            build/fuzz/fuzz/crash-*
+            build/fuzz/fuzz/leak-*
+            build/fuzz/fuzz/timeout-*
+            build/fuzz/fuzz/oom-*
           if-no-files-found: ignore
 
   # -------------------------------------------------------------------------

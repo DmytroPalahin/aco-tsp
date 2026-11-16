@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(
   aco-tsp
-  VERSION 2.0.0
+  VERSION 2.0.1
   DESCRIPTION "Ant colony optimisation for the travelling salesman problem"
   HOMEPAGE_URL "https://github.com/DmytroPalahin/aco-tsp"
   LANGUAGES C)

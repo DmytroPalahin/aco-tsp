@@ -54,8 +54,11 @@
     {
       "name": "fuzz",
       "displayName": "Fuzzing",
-      "description": "libFuzzer harnesses with sanitizers (requires Clang)",
+      "description": "libFuzzer harnesses with sanitizers (a Clang with libFuzzer; on macOS, Homebrew's LLVM)",
       "inherits": "base",
+      "environment": {
+        "PATH": "/opt/homebrew/opt/llvm/bin${pathListSep}/usr/local/opt/llvm/bin${pathListSep}$penv{PATH}"
+      },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_C_COMPILER": "clang",
@@ -93,6 +96,12 @@
       "name": "fuzz",
       "configurePreset": "fuzz",
       "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "fuzz-run",
+      "configurePreset": "fuzz",
+      "configuration": "RelWithDebInfo",
+      "targets": ["fuzz"]
     }
   ],
   "testPresets": [
@@ -165,6 +174,14 @@
       "steps": [
         { "type": "configure", "name": "coverage" },
         { "type": "build", "name": "coverage-report" }
+      ]
+    },
+    {
+      "name": "fuzz",
+      "displayName": "Build the harness and fuzz the parser for one minute",
+      "steps": [
+        { "type": "configure", "name": "fuzz" },
+        { "type": "build", "name": "fuzz-run" }
       ]
     }
   ]
