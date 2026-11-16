@@ -13,6 +13,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   tests, prints the coverage of each file, writes the annotated sources and
   fails below 90 % of the lines (`ACO_COVERAGE_MINIMUM`). It works with
   Clang and with GCC, and CI runs the same command.
+- `cmake --workflow --preset fuzz` builds the harness and fuzzes the parser
+  for one minute, as CI does. On macOS the preset finds Homebrew's LLVM by
+  itself, because Apple's Clang has no libFuzzer.
 
 ### Changed
 

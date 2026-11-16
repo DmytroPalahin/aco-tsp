@@ -292,6 +292,7 @@ archive/        the 2023 coursework, unmodified
 cmake --workflow --preset dev        # debug build, warnings as errors, all tests
 cmake --workflow --preset sanitize   # the same under ASan and UBSan
 cmake --workflow --preset coverage   # coverage report, fails below 90 %
+cmake --workflow --preset fuzz       # one minute of libFuzzer on the parser
 cmake --build build/dev --target format
 ```
 

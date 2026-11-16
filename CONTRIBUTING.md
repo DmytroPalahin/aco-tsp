@@ -31,9 +31,12 @@ errors, compiles it and runs every test. The other presets:
 | `release` | Optimised build | `cmake --workflow --preset release` |
 | `sanitize` | AddressSanitizer + UndefinedBehaviorSanitizer | `cmake --workflow --preset sanitize` |
 | `coverage` | Coverage report, fails below 90 % of the lines | `cmake --workflow --preset coverage` |
-| `fuzz` | libFuzzer harness for the parser (Clang) | `cmake --preset fuzz` |
+| `fuzz` | One minute of libFuzzer on the parser | `cmake --workflow --preset fuzz` |
 
-Build trees live in `build/<preset>`.
+Build trees live in `build/<preset>`. Each command works as it stands, with
+one thing to install on macOS: `fuzz` needs a Clang that comes with
+libFuzzer, and Apple's does not. Run `brew install llvm` once; the preset
+finds it there.
 
 ### Useful commands
 
@@ -54,23 +57,18 @@ find src tests examples -name '*.c' | xargs clang-tidy -p build/dev --quiet
 # build/coverage/coverage-report/html
 cmake --workflow --preset coverage
 
-# Fuzz the parser for a minute
-cmake --preset fuzz && cmake --build --preset fuzz
-mkdir -p /tmp/corpus && cp fuzz/corpus/* /tmp/corpus/
-build/fuzz/fuzz/fuzz_instance_parse -max_len=2048 -max_total_time=60 /tmp/corpus
+# Fuzz the parser for a minute, as CI does, then for as long as you like
+cmake --workflow --preset fuzz
+build/fuzz/fuzz/fuzz_instance_parse -max_len=2048 -max_total_time=600 build/fuzz/fuzz/corpus
 
 # Build the API reference (Doxygen) and the report (latexmk)
 cmake --build build/dev --target docs
 cmake --build build/dev --target report
 ```
 
-The `fuzz` preset needs a Clang that comes with libFuzzer. Apple's does not,
-and the configure step stops with a message that says so. On macOS, install
-LLVM with Homebrew (`brew install llvm`) and name its compiler:
-
-```bash
-cmake --preset fuzz --fresh -DCMAKE_C_COMPILER="$(brew --prefix llvm)/bin/clang"
-```
+On macOS, clang-tidy is not part of Xcode either. It comes with the same
+Homebrew package, outside the `PATH`: call it as
+`"$(brew --prefix llvm)/bin/clang-tidy"`.
 
 The coverage report works with Clang (`llvm-cov`, which comes with the
 compiler) and with GCC (which needs [gcovr](https://gcovr.com)).
